@@ -3,57 +3,52 @@ import 'package:omni_kv/omni_kv.dart';
 import 'package:omni_kv_shared_preferences/omni_kv_shared_preferences.dart';
 import 'package:omni_kv_testing/omni_kv_testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('SharedPreferencesKvAdapter', () {
-    late SharedPreferences prefs;
-    late KvGateway<SharedPreferencesKvAdapter> gateway;
+  group('SharedPreferencesKvAdapter conformance', () {
+    runPersistentKvAdapterTests<SharedPreferencesKvAdapter>(
+      createAdapter: () async {
+        SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
+        return SharedPreferencesKvAdapter(SharedPreferencesAsync());
+      },
+    );
+  });
 
-    setUp(() async {
-      SharedPreferences.setMockInitialValues({});
-      prefs = await SharedPreferences.getInstance();
-      gateway = KvGateway(SharedPreferencesKvAdapter(prefs));
+  group('SharedPreferencesKvAdapter semantics', () {
+    late SharedPreferencesAsync preferences;
+    late KeyValue<SharedPreferencesKvAdapter> kv;
+
+    setUp(() {
+      SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
+      preferences = SharedPreferencesAsync();
+      kv = KeyValue(SharedPreferencesKvAdapter(preferences));
     });
 
-    test('writes and reads natively supported primitives', () async {
-      await gateway.test(.stringVal).write('Hello');
-      await gateway.test(.intVal).write(42);
-      await gateway.test(.doubleVal).write(3.14);
-      await gateway.test(.boolVal).write(true);
-      await gateway.test(.listVal).write(['a', 'b']);
-
-      expect(await gateway.test(.stringVal).read(), 'Hello');
-      expect(await gateway.test(.intVal).read(), 42);
-      expect(await gateway.test(.doubleVal).read(), 3.14);
-      expect(await gateway.test(.boolVal).read(), isTrue);
-      expect(await gateway.test(.listVal).read(), ['a', 'b']);
-    });
-
-    test('throws KvUnsupportedValueException for complex types without converters', () async {
+    test('rejects complex types without a key converter', () async {
       expect(
-        () => gateway.test(.mapVal).write({'key': 'value'}),
+        () => kv.test(.mapVal).write({'key': 'value'}),
         throwsA(isA<UnsupportedValueKvException>()),
       );
     });
 
-    test('batch writes and removes correctly', () async {
-      await gateway.test(.stringVal).write('Old');
+    test('scoped clear preserves unrelated keys', () async {
+      final scoped = KeyValue(
+        SharedPreferencesKvAdapter(
+          preferences,
+          codec: const SharedPreferencesKvCodec(prefix: 'app.'),
+        ),
+      );
+      await preferences.setString('other.key', 'keep');
+      await scoped.test(.stringVal).write('remove');
 
-      await gateway.batch((entry) async {
-        await entry.test(.stringVal).remove();
-        await entry.test(.intVal).write(99);
-      });
+      await scoped.clear();
 
-      expect(await gateway.test(.stringVal).exists(), isFalse);
-      expect(await gateway.test(.intVal).read(), 99);
-    });
-
-    test('clear removes all entries', () async {
-      await gateway.test(.intVal).write(1);
-      await gateway.clear(allowUnscoped: true);
-      expect(prefs.getKeys(), isEmpty);
+      expect(await preferences.getString('other.key'), 'keep');
+      expect(await scoped.test(.stringVal).exists(), isFalse);
     });
   });
 }

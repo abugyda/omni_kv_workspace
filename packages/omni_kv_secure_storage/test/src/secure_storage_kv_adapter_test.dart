@@ -7,48 +7,30 @@ import 'package:omni_kv_testing/omni_kv_testing.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('SecureStorageKvAdapter', () {
-    late KvGateway<SecureStorageKvAdapter> gateway;
+  group('SecureStorageKvAdapter conformance', () {
+    runPersistentKvAdapterTests<SecureStorageKvAdapter>(
+      createAdapter: () async {
+        FlutterSecureStorage.setMockInitialValues({});
+        return const SecureStorageKvAdapter(FlutterSecureStorage());
+      },
+    );
+  });
+
+  group('SecureStorageKvAdapter semantics', () {
+    late KeyValue<SecureStorageKvAdapter> kv;
 
     setUp(() {
       FlutterSecureStorage.setMockInitialValues({});
       const storage = FlutterSecureStorage();
-      gateway = const KvGateway(SecureStorageKvAdapter(storage));
+      kv = const KeyValue(SecureStorageKvAdapter(storage));
     });
 
-    test('writes and reads strings natively', () async {
-      await gateway.test(.token).write('super_secret_string');
-      expect(await gateway.test(.token).read(), 'super_secret_string');
-    });
+    test('automatically JSON encodes and decodes structured values', () async {
+      await kv.test(.pinCode).write(1234);
+      expect(await kv.test(.pinCode).read(), 1234);
 
-    test('automatically JSON encodes/decodes non-string primitives', () async {
-      await gateway.test(.pinCode).write(1234);
-      expect(await gateway.test(.pinCode).read(), 1234);
-
-      await gateway.test(.metadata).write({'role': 'admin'});
-      expect((await gateway.test(.metadata).read())['role'], 'admin');
-    });
-
-    test('remove and clear work correctly', () async {
-      await gateway.test(.token).write('secret');
-      await gateway.test(.token).remove();
-      expect(await gateway.test(.token).exists(), isFalse);
-
-      await gateway.test(.pinCode).write(1111);
-      await gateway.clear(allowUnscoped: true);
-      expect(await gateway.test(.pinCode).exists(), isFalse);
-    });
-
-    test('batch performs operations correctly', () async {
-      await gateway.test(.token).write('old_token');
-
-      await gateway.batch((entry) async {
-        await entry.test(.token).remove();
-        await entry.test(.pinCode).write(9999);
-      });
-
-      expect(await gateway.test(.token).exists(), isFalse);
-      expect(await gateway.test(.pinCode).read(), 9999);
+      await kv.test(.metadata).write({'role': 'admin'});
+      expect((await kv.test(.metadata).read())['role'], 'admin');
     });
   });
 }

@@ -7,6 +7,11 @@ final class SharedPreferencesKvCapability implements ReadWriteClearBatchKvCapabi
   const SharedPreferencesKvCapability();
 }
 
+/// OmniKV adapter backed by the modern asynchronous SharedPreferences API.
+///
+/// `SharedPreferencesAsync` avoids the stale-cache behavior of the legacy
+/// `SharedPreferences` API and maps naturally to OmniKV's asynchronous adapter
+/// contract.
 final class SharedPreferencesKvAdapter
     with SequentialKvBatchAdapter<SharedPreferencesKvCapability>
     implements ReadWriteClearBatchKvAdapter<SharedPreferencesKvCapability> {
@@ -15,18 +20,20 @@ final class SharedPreferencesKvAdapter
     this.codec = const SharedPreferencesKvCodec(),
   });
 
-  final SharedPreferences preferences;
+  final SharedPreferencesAsync preferences;
 
   @override
   final KvCodec codec;
 
   @override
   Future<Object?> read(String key) async {
-    return codec.decode(preferences.get(codec.storageKey(key)));
+    final storageKey = codec.storageKey(key);
+    final values = await preferences.getAll(allowList: <String>{storageKey});
+    return codec.decode(values[storageKey]);
   }
 
   @override
-  Future<bool> contains(String key) async {
+  Future<bool> contains(String key) {
     return preferences.containsKey(codec.storageKey(key));
   }
 
@@ -59,8 +66,8 @@ final class SharedPreferencesKvAdapter
   }
 
   @override
-  Future<void> remove(String key) async {
-    await preferences.remove(codec.storageKey(key));
+  Future<void> remove(String key) {
+    return preferences.remove(codec.storageKey(key));
   }
 
   @override
@@ -71,10 +78,10 @@ final class SharedPreferencesKvAdapter
       adapterName: 'SharedPreferencesKvAdapter',
     );
 
-    final keys = preferences.getKeys().where(codec.ownsKey).toList(growable: false);
-    for (final key in keys) {
-      await preferences.remove(key);
-    }
+    final keys = await preferences.getKeys();
+    final ownedKeys = keys.where(codec.ownsKey).toSet();
+    if (ownedKeys.isEmpty) return;
+    await preferences.clear(allowList: ownedKeys);
   }
 
   @override
