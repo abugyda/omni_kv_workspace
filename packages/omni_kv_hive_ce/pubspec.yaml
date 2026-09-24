@@ -20,7 +20,7 @@ environment:
 resolution: workspace
 
 dependencies:
-  hive_ce: ^2.19.3
+  hive_ce: ^2.20.0
   omni_kv: ^0.2.0
 
 dev_dependencies:
