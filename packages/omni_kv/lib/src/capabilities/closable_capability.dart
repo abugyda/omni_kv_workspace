@@ -1,6 +1,6 @@
+import '../core/key_value.dart';
 import '../core/kv_adapter.dart';
 import '../core/kv_capability.dart';
-import '../core/kv_gateway.dart';
 
 /// Adapter contract for releasing resources.
 abstract interface class ClosableKvAdapter<TCapability extends ClosableKvCapability>
@@ -8,7 +8,8 @@ abstract interface class ClosableKvAdapter<TCapability extends ClosableKvCapabil
   Future<void> close();
 }
 
-extension ClosableKvGatewayExtension<TAdapter extends ClosableKvAdapter<dynamic>>
-    on KvGateway<TAdapter> {
+/// Lifecycle operations exposed when the adapter supports [ClosableKvAdapter].
+extension CloseKvOperations<TAdapter extends ClosableKvAdapter<dynamic>>
+    on KeyValue<TAdapter> {
   Future<void> close() => adapter.close();
 }

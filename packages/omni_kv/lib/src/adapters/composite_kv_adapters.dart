@@ -1,4 +1,3 @@
-import '../core/kv_capability.dart';
 import '../capabilities/batchable_capability.dart';
 import '../capabilities/clearable_capability.dart';
 import '../capabilities/closable_capability.dart';
@@ -6,6 +5,7 @@ import '../capabilities/readable_capability.dart';
 import '../capabilities/removable_capability.dart';
 import '../capabilities/watchable_capability.dart';
 import '../capabilities/writable_capability.dart';
+import '../core/kv_capability.dart';
 
 /// Composite adapter contract for read/write/remove stores.
 abstract interface class ReadWriteKvAdapter<TCapability extends ReadWriteKvCapability>

@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import '../core/key_value.dart';
 import '../core/kv_adapter.dart';
 import '../core/kv_capability.dart';
 import '../core/kv_codec.dart';
-import '../core/kv_gateway.dart';
 import '../models/kv_operation.dart';
 import 'removable_capability.dart';
 import 'writable_capability.dart';
@@ -71,11 +71,11 @@ final class KvOperationRecorder
   }
 }
 
-/// A restricted gateway scope that only permits write and remove operations.
-typedef KvBatchScope = KvGateway<KvOperationRecorder>;
+/// A restricted key-value scope that only permits write and remove operations.
+typedef KvBatchScope = KeyValue<KvOperationRecorder>;
 
-extension BatchKvGatewayExtension<TAdapter extends BatchKvAdapter<dynamic>>
-    on KvGateway<TAdapter> {
+extension BatchKvOperations<TAdapter extends BatchKvAdapter<dynamic>>
+    on KeyValue<TAdapter> {
   /// Executes a sequence of write and remove operations as a single batch.
   Future<void> batch(
     FutureOr<void> Function(KvBatchScope scope) build,

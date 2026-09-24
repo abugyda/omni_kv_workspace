@@ -1,23 +1,26 @@
+import '../core/key_value.dart';
 import '../core/kv_adapter.dart';
 import '../core/kv_capability.dart';
-import '../core/kv_gateway.dart';
 import '../utilities/kv_exception.dart';
 
 /// Adapter contract for clearing values controlled by an adapter.
 ///
-/// Implementations should clear only keys owned by their codec. Unscoped clears
-/// are dangerous for persistent stores and should require explicit opt-in.
+/// Persistent implementations should clear only keys owned by their codec.
+/// Unscoped clears must require explicit opt-in.
 abstract interface class ClearKvAdapter<TCapability extends ClearKvCapability>
     implements KvAdapter<TCapability> {
   Future<void> clear({bool allowUnscoped = false});
 }
 
-extension ClearKvGatewayExtension<TAdapter extends ClearKvAdapter<dynamic>> on KvGateway<TAdapter> {
+/// Clear operations exposed when the adapter supports [ClearKvAdapter].
+extension ClearKvOperations<TAdapter extends ClearKvAdapter<dynamic>>
+    on KeyValue<TAdapter> {
   Future<void> clear({bool allowUnscoped = false}) {
     return adapter.clear(allowUnscoped: allowUnscoped);
   }
 }
 
+/// Guards destructive clears for shared persistent backends.
 void ensureScopedClearAllowed({
   required bool isScoped,
   required bool allowUnscoped,

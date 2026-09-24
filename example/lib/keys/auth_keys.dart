@@ -1,4 +1,5 @@
 import 'package:omni_kv/omni_kv.dart';
+
 import '../models/user_profile.dart';
 
 final class AuthKey<T> extends KvKey<T> {
@@ -25,6 +26,6 @@ final class AuthKey<T> extends KvKey<T> {
   );
 }
 
-extension AuthKvGatewayNamespace<TAdapter extends KvAdapter<dynamic>> on KvGateway<TAdapter> {
+extension AuthKeyValueNamespace<TAdapter extends KvAdapter<dynamic>> on KeyValue<TAdapter> {
   KvEntry<T, TAdapter> auth<T>(AuthKey<T> key) => entry(key);
 }

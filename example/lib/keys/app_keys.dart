@@ -1,4 +1,5 @@
 import 'package:omni_kv/omni_kv.dart';
+
 import '../models/app_theme.dart';
 
 final class AppKey<T> extends KvKey<T> {
@@ -28,6 +29,6 @@ final class AppKey<T> extends KvKey<T> {
   );
 }
 
-extension AppKvGatewayNamespace<TAdapter extends KvAdapter<dynamic>> on KvGateway<TAdapter> {
+extension AppKeyValueNamespace<TAdapter extends KvAdapter<dynamic>> on KeyValue<TAdapter> {
   KvEntry<T, TAdapter> app<T>(AppKey<T> key) => entry(key);
 }
