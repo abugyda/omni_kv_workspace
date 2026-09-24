@@ -1,12 +1,14 @@
 # omni_kv_testing
 
-Adapter conformance tests and shared test keys for OmniKV.
+Reusable conformance suites and typed fixtures for OmniKV adapters.
 
 ```dart
-void main() {
-  runFullKvAdapterTests(
-    createAdapter: () async => MemoryKvAdapter(),
-    disposeAdapter: (adapter) => adapter.close(),
-  );
-}
+runPersistentKvAdapterTests<MyAdapter>(
+  createAdapter: () async => MyAdapter(...),
+  disposeAdapter: (adapter) => adapter.close(),
+);
 ```
+
+Use `runFullKvAdapterTests` for full reactive adapters. Individual read/write, clear, batch, and watch suites are also exported.
+
+Documentation: https://docs.abugyda.com/omni-kv/testing

@@ -1,17 +1,19 @@
 # omni_kv_shared_preferences
 
-SharedPreferences adapter for OmniKV.
-
-## Usage
+OmniKV adapter for the modern `SharedPreferencesAsync` API.
 
 ```dart
-final prefs = await SharedPreferences.getInstance();
-final kv = KvGateway(
+final preferences = SharedPreferencesAsync();
+final kv = KeyValue(
   SharedPreferencesKvAdapter(
-    prefs,
-    codec: const SharedPreferencesKvCodec(prefix: 'my_app.'),
+    preferences,
+    codec: const SharedPreferencesKvCodec(prefix: 'adouli.'),
   ),
 );
+
+await kv(AppKeys.locale).write('am');
 ```
 
-SharedPreferences supports primitive values. Use `KvConverter`s on keys for complex values.
+The adapter supports `String`, `int`, `double`, `bool`, and `List<String>` after key conversion. It is intentionally non-reactive; use `CachedKvAdapter` with `MemoryKvAdapter` when streams are required.
+
+Documentation: https://docs.abugyda.com/omni-kv/adapters/shared-preferences
