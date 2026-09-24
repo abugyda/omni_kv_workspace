@@ -6,7 +6,7 @@ enum Role { admin, user }
 void main() {
   group('CollectionConverter', () {
     test('ListConverter converts elements', () {
-      const converter = ListKvConverter<Role, String>(EnumKvConverter.toName(Role.values));
+      const converter = ListKvConverter<Role>(EnumKvConverter.toName(Role.values));
       final list = [Role.admin, Role.user];
 
       final encoded = converter.encode(list);
@@ -15,7 +15,7 @@ void main() {
     });
 
     test('SetConverter converts elements and restores Set', () {
-      const converter = SetKvConverter<Role, String>(EnumKvConverter.toName(Role.values));
+      const converter = SetKvConverter<Role>(EnumKvConverter.toName(Role.values));
       final set = {Role.admin, Role.user};
 
       final encoded = converter.encode(set);

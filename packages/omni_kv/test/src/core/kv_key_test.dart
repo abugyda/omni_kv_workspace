@@ -8,7 +8,12 @@ void main() {
       expect(key.decode(null, isPresent: false), 18);
     });
 
-    test('throws KvMissingValueException when required and missing', () {
+    test('nullable keys may use null as their missing default', () {
+      const key = KvKey<String?>('bio', defaultValue: null);
+      expect(key.decode(null, isPresent: false), isNull);
+    });
+
+    test('throws MissingValueKvException when required and missing', () {
       const key = KvKey<String>.required('token');
       expect(
         () => key.decode(null, isPresent: false),
@@ -16,9 +21,12 @@ void main() {
       );
     });
 
-    test('returns null when present but stored value is null', () {
+    test('rejects a present null because null writes mean removal', () {
       const key = KvKey<String?>('bio', defaultValue: null);
-      expect(key.decode(null, isPresent: true), isNull);
+      expect(
+        () => key.decode(null, isPresent: true),
+        throwsA(isA<TypeKvException>()),
+      );
     });
   });
 }

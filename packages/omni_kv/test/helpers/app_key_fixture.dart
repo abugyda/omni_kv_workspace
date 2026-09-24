@@ -8,6 +8,6 @@ class AppKey<T> extends KvKey<T> {
   static const theme = AppKey<String>('theme', defaultValue: 'dark');
 }
 
-extension AppKeyGatewayX<TAdapter extends KvAdapter<dynamic>> on KvGateway<TAdapter> {
+extension AppKeyValueX<TAdapter extends KvAdapter<dynamic>> on KeyValue<TAdapter> {
   KvEntry<T, TAdapter> app<T>(AppKey<T> key) => entry(key);
 }

@@ -7,16 +7,39 @@ import 'package:omni_kv_testing/omni_kv_testing.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('HiveCeKvAdapter', () {
+  group('HiveCeKvAdapter conformance', () {
+    final directories = <HiveCeKvAdapter, Directory>{};
+    var counter = 0;
+
+    runFullKvAdapterTests<HiveCeKvAdapter>(
+      createAdapter: () async {
+        final directory = Directory.systemTemp.createTempSync('omni_kv_hive_contract_');
+        Hive.init(directory.path);
+        final box = await Hive.openBox<Object?>('contract_${counter++}');
+        final adapter = HiveCeKvAdapter(box);
+        directories[adapter] = directory;
+        return adapter;
+      },
+      disposeAdapter: (adapter) async {
+        await adapter.close();
+        final directory = directories.remove(adapter);
+        if (directory?.existsSync() ?? false) {
+          directory!.deleteSync(recursive: true);
+        }
+      },
+    );
+  });
+
+  group('HiveCeKvAdapter semantics', () {
     late Directory tempDir;
     late Box<Object?> box;
-    late KvGateway<HiveCeKvAdapter> gateway;
+    late KeyValue<HiveCeKvAdapter> kv;
 
     setUp(() async {
       tempDir = Directory.systemTemp.createTempSync('omni_kv_hive_test_');
       Hive.init(tempDir.path);
       box = await Hive.openBox<Object?>('test_box');
-      gateway = KvGateway(HiveCeKvAdapter(box));
+      kv = KeyValue(HiveCeKvAdapter(box));
     });
 
     tearDown(() async {
@@ -24,43 +47,39 @@ void main() {
       if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
     });
 
-    test('persists read and write operations', () async {
-      await gateway.test(.theme).write('dark');
-      expect(await gateway.test(.theme).read(), 'dark');
+    test('persists logical values through the codec', () async {
+      await kv.test(.theme).write('dark');
+      expect(await kv.test(.theme).read(), 'dark');
       expect(box.get('test.theme'), 'dark');
     });
 
-    test('batch correctly updates and deletes', () async {
-      await gateway.test(.theme).write('light');
-
-      await gateway.batch((entry) async {
-        await entry.test(.theme).remove();
-        await entry.test(.volume).write(0.8);
-      });
-
-      expect(await gateway.test(.theme).exists(), isFalse);
-      expect(await gateway.test(.volume).read(), 0.8);
-    });
-
-    test('clear empties the box', () async {
-      await gateway.test(.theme).write('dark');
-      await gateway.clear(allowUnscoped: true);
-      expect(box.isEmpty, isTrue);
-    });
-
-    test('watch streams changes from the Hive Box', () async {
+    test('watch streams changes from the Hive box', () async {
       final expectation = expectLater(
-        gateway.test(.theme).watch().map((c) => c.value),
-        emitsInOrder(['dark', null]),
+        kv.test(.theme).watch().map((change) => change.value),
+        emitsInOrder(<Object?>['dark', null]),
       );
 
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      await gateway.test(.theme).write('dark');
-
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      await gateway.test(.theme).remove();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await kv.test(.theme).write('dark');
+      await kv.test(.theme).remove();
 
       await expectation;
+    });
+
+    test('scoped watchAll ignores keys outside the codec scope', () async {
+      final scoped = HiveCeKvAdapter(
+        box,
+        codec: const HiveCeKvCodec(prefix: 'owned.'),
+      );
+      final changes = <KvChange<Object?>>[];
+      final subscription = scoped.watchAll().listen(changes.add);
+
+      await box.put('foreign.key', 'ignore');
+      await scoped.write('theme', 'dark');
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(changes.map((change) => change.key), ['theme']);
+      await subscription.cancel();
     });
   });
 }

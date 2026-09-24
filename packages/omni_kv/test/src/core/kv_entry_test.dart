@@ -5,15 +5,15 @@ import '../../helpers/fake_kv_adapter.dart';
 
 void main() {
   group('KvEntry Fluent API', () {
-    late KvGateway<FakeKvAdapter> gateway;
+    late KeyValue<FakeKvAdapter> kv;
     const testKey = KvKey<int>('score', defaultValue: 0);
 
     setUp(() {
-      gateway = KvGateway(FakeKvAdapter());
+      kv = KeyValue(FakeKvAdapter());
     });
 
     test('fluent read, write, exists, remove', () async {
-      final entry = gateway.entry(testKey);
+      final entry = kv.entry(testKey);
 
       expect(await entry.exists(), isFalse);
       expect(await entry.read(), 0);
@@ -27,7 +27,7 @@ void main() {
     });
 
     test('fluent watch streams changes', () async {
-      final entry = gateway.entry(testKey);
+      final entry = kv.entry(testKey);
 
       // FIX: Assign expectLater to a variable and await it AFTER the writes!
       final expectation = expectLater(

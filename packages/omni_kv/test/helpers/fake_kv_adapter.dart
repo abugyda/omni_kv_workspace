@@ -21,6 +21,10 @@ class FakeKvAdapter implements FullKvAdapter<FakeKvCapability> {
 
   @override
   Future<void> write(String key, Object? value) async {
+    if (value == null) {
+      await remove(key);
+      return;
+    }
     final previous = store[key];
     store[key] = value;
     controller.add(UpdateKvChange(key: key, value: value, previousValue: previous));

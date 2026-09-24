@@ -5,12 +5,12 @@ import '../../helpers/app_key_fixture.dart';
 
 void main() {
   group('KvBatch', () {
-    test('gateway batch collects ordered operations', () async {
+    test('kv batch collects ordered operations', () async {
       final collector = KvOperationRecorder();
-      final gateway = KvGateway(collector);
+      final kv = KeyValue(collector);
 
-      await gateway.write(AppKey.theme, 'light');
-      await gateway.remove(AppKey.theme);
+      await kv.write(AppKey.theme, 'light');
+      await kv.remove(AppKey.theme);
 
       expect(collector.operations, hasLength(2));
       expect(collector.operations[0], isA<WriteKvOperation>());
