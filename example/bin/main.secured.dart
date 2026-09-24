@@ -20,7 +20,7 @@ Future<void> main() async {
     ),
     writePolicy: CachedKvWritePolicy.writeThrough,
   );
-  final kv = KvGateway(LoggingKvAdapter(cached, logger: Print.step));
+  final kv = KeyValue(LoggingKvAdapter(cached, logger: Print.step));
 
   const profile = UserProfile(id: '1', role: 'admin', email: 'admin@omni.kv');
 

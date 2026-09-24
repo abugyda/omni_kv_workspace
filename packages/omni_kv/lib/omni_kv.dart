@@ -8,7 +8,6 @@ export 'src/adapters/memory_kv_adapter.dart';
 export 'src/capabilities/batchable_capability.dart';
 export 'src/capabilities/clearable_capability.dart';
 export 'src/capabilities/closable_capability.dart';
-export 'src/capabilities/gateway_typedefs.dart';
 export 'src/capabilities/readable_capability.dart';
 export 'src/capabilities/removable_capability.dart';
 export 'src/capabilities/watchable_capability.dart';
@@ -36,7 +35,7 @@ export 'src/core/kv_capability.dart';
 export 'src/core/kv_codec.dart';
 export 'src/core/kv_converter.dart';
 export 'src/core/kv_entry.dart';
-export 'src/core/kv_gateway.dart';
+export 'src/core/key_value.dart';
 export 'src/core/kv_key.dart';
 
 // ---- Models -------------------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import '../capabilities/batchable_capability.dart';
-import 'composite_kv_adapters.dart';
 import '../codecs/memory_kv_codec.dart';
 import '../core/kv_capability.dart';
 import '../core/kv_codec.dart';
 import '../models/kv_change.dart';
+import 'composite_kv_adapters.dart';
 
 final class MemoryKvAdapter
     with SequentialKvBatchAdapter<MemoryKvCapability>
@@ -53,8 +53,8 @@ final class MemoryKvAdapter
       storageKey,
       UpdateKvChange<Object?>(
         key: key,
-        value: encoded,
-        previousValue: previous,
+        value: codec.decode(encoded),
+        previousValue: previous == null ? null : codec.decode(previous),
       ),
     );
   }
@@ -70,7 +70,7 @@ final class MemoryKvAdapter
       storageKey,
       RemoveKvChange<Object?>(
         key: key,
-        previousValue: previous,
+        previousValue: previous == null ? null : codec.decode(previous),
       ),
     );
   }

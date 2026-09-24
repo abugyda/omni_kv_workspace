@@ -10,8 +10,8 @@ import 'pages/home_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final prefs = await SharedPreferences.getInstance();
-  final kv = KvGateway(
+  final prefs = SharedPreferencesAsync();
+  final kv = KeyValue(
     CachedKvAdapter(
       primary: MemoryKvAdapter(),
       persistent: SharedPreferencesKvAdapter(prefs, codec: const SharedPreferencesKvCodec(prefix: 'ui_app.')),
@@ -23,7 +23,7 @@ void main() async {
 
 class OmniKvApp extends StatelessWidget {
   const OmniKvApp({super.key, required this.kv});
-  final KvGateway<CachedKvAdapter> kv;
+  final KeyValue<CachedKvAdapter> kv;
 
   @override
   Widget build(BuildContext context) {

@@ -24,9 +24,10 @@ class TestKey<T> extends KvKey<T> {
   static const token = TestKey<String>.required('token');
   static const pinCode = TestKey<int>.required('pin_code');
   static const metadata = TestKey<Map<String, dynamic>>.required('metadata');
+  static const optionalNote = TestKey<String?>('optional_note', defaultValue: null);
 }
 
-extension TestKeyGatewayX<TAdapter extends KvAdapter<dynamic>> on KvGateway<TAdapter> {
+extension TestKeyValueX<TAdapter extends KvAdapter<dynamic>> on KeyValue<TAdapter> {
   KvEntry<T, TAdapter> test<T>(TestKey<T> key) => entry(key);
 }
 
@@ -39,11 +40,11 @@ void runReadWriteKvAdapterTests<TAdapter extends ReadWriteKvAdapter<dynamic>>({
   DisposeKvAdapter<TAdapter>? disposeAdapter,
 }) {
   late TAdapter adapter;
-  late KvGateway<TAdapter> gateway;
+  late KeyValue<TAdapter> kv;
 
   setUp(() async {
     adapter = await createAdapter();
-    gateway = KvGateway(adapter);
+    kv = KeyValue(adapter);
   });
 
   tearDown(() async {
@@ -51,22 +52,32 @@ void runReadWriteKvAdapterTests<TAdapter extends ReadWriteKvAdapter<dynamic>>({
   });
 
   test('reads defaults and writes typed values', () async {
-    expect(await gateway.test(.userName).read(), 'Anonymous');
-    expect(await gateway.test(.userName).exists(), isFalse);
+    expect(await kv.test(.userName).read(), 'Anonymous');
+    expect(await kv.test(.userName).exists(), isFalse);
 
-    await gateway.test(.userName).write('Alice');
-    await gateway.test(.score).write(42);
+    await kv.test(.userName).write('Alice');
+    await kv.test(.score).write(42);
 
-    expect(await gateway.test(.userName).read(), 'Alice');
-    expect(await gateway.test(.score).read(), 42);
-    expect(await gateway.test(.score).exists(), isTrue);
+    expect(await kv.test(.userName).read(), 'Alice');
+    expect(await kv.test(.score).read(), 42);
+    expect(await kv.test(.score).exists(), isTrue);
   });
 
   test('removes values', () async {
-    await gateway.test(.theme).write('dark');
-    await gateway.test(.theme).remove();
-    expect(await gateway.test(.theme).exists(), isFalse);
-    expect(await gateway.test(.theme).read(), 'system');
+    await kv.test(.theme).write('dark');
+    await kv.test(.theme).remove();
+    expect(await kv.test(.theme).exists(), isFalse);
+    expect(await kv.test(.theme).read(), 'system');
+  });
+
+  test('writing null removes a nullable key', () async {
+    await kv.test(.optionalNote).write('hello');
+    expect(await kv.test(.optionalNote).exists(), isTrue);
+
+    await kv.test(.optionalNote).write(null);
+
+    expect(await kv.test(.optionalNote).exists(), isFalse);
+    expect(await kv.test(.optionalNote).read(), isNull);
   });
 }
 
@@ -76,11 +87,11 @@ void runClearKvAdapterTests<TAdapter extends ReadWriteClearBatchKvAdapter<dynami
   DisposeKvAdapter<TAdapter>? disposeAdapter,
 }) {
   late TAdapter adapter;
-  late KvGateway<TAdapter> gateway;
+  late KeyValue<TAdapter> kv;
 
   setUp(() async {
     adapter = await createAdapter();
-    gateway = KvGateway(adapter);
+    kv = KeyValue(adapter);
   });
 
   tearDown(() async {
@@ -88,11 +99,11 @@ void runClearKvAdapterTests<TAdapter extends ReadWriteClearBatchKvAdapter<dynami
   });
 
   test('clear removes adapter-owned values', () async {
-    await gateway.test(.theme).write('dark');
-    await gateway.test(.score).write(7);
-    await gateway.clear(allowUnscoped: true);
-    expect(await gateway.test(.theme).exists(), isFalse);
-    expect(await gateway.test(.score).exists(), isFalse);
+    await kv.test(.theme).write('dark');
+    await kv.test(.score).write(7);
+    await kv.clear(allowUnscoped: true);
+    expect(await kv.test(.theme).exists(), isFalse);
+    expect(await kv.test(.score).exists(), isFalse);
   });
 }
 
@@ -102,11 +113,11 @@ void runBatchKvAdapterTests<TAdapter extends ReadWriteClearBatchKvAdapter<dynami
   DisposeKvAdapter<TAdapter>? disposeAdapter,
 }) {
   late TAdapter adapter;
-  late KvGateway<TAdapter> gateway;
+  late KeyValue<TAdapter> kv;
 
   setUp(() async {
     adapter = await createAdapter();
-    gateway = KvGateway(adapter);
+    kv = KeyValue(adapter);
   });
 
   tearDown(() async {
@@ -114,17 +125,17 @@ void runBatchKvAdapterTests<TAdapter extends ReadWriteClearBatchKvAdapter<dynami
   });
 
   test('batch writes and removes in order', () async {
-    await gateway.test(.theme).write('old');
+    await kv.test(.theme).write('old');
 
-    await gateway.batch((scope) async {
+    await kv.batch((scope) async {
       await scope.test(.theme).remove();
       await scope.test(.score).write(99);
       await scope.test(.userName).write('Batch User');
     });
 
-    expect(await gateway.test(.theme).exists(), isFalse);
-    expect(await gateway.test(.score).read(), 99);
-    expect(await gateway.test(.userName).read(), 'Batch User');
+    expect(await kv.test(.theme).exists(), isFalse);
+    expect(await kv.test(.score).read(), 99);
+    expect(await kv.test(.userName).read(), 'Batch User');
   });
 }
 
@@ -134,11 +145,11 @@ void runWatchKvAdapterTests<TAdapter extends FullKvAdapter<dynamic>>({
   DisposeKvAdapter<TAdapter>? disposeAdapter,
 }) {
   late TAdapter adapter;
-  late KvGateway<TAdapter> gateway;
+  late KeyValue<TAdapter> kv;
 
   setUp(() async {
     adapter = await createAdapter();
-    gateway = KvGateway(adapter);
+    kv = KeyValue(adapter);
   });
 
   tearDown(() async {
@@ -147,17 +158,38 @@ void runWatchKvAdapterTests<TAdapter extends FullKvAdapter<dynamic>>({
 
   test('watch emits updates and removes', () async {
     final expectation = expectLater(
-      gateway.test(.score).watch().map((change) => change.value),
+      kv.test(.score).watch().map((change) => change.value),
       emitsInOrder(<Object?>[1, 2, null]),
     );
 
     await Future<void>.delayed(const Duration(milliseconds: 10));
-    await gateway.test(.score).write(1);
-    await gateway.test(.score).write(2);
-    await gateway.test(.score).remove();
+    await kv.test(.score).write(1);
+    await kv.test(.score).write(2);
+    await kv.test(.score).remove();
 
     await expectation;
   });
+}
+
+/// Runs the common suite for persistent non-reactive adapters.
+void runPersistentKvAdapterTests<
+  TAdapter extends ReadWriteClearBatchKvAdapter<dynamic>
+>({
+  required CreateKvAdapter<TAdapter> createAdapter,
+  DisposeKvAdapter<TAdapter>? disposeAdapter,
+}) {
+  runReadWriteKvAdapterTests<TAdapter>(
+    createAdapter: createAdapter,
+    disposeAdapter: disposeAdapter,
+  );
+  runClearKvAdapterTests<TAdapter>(
+    createAdapter: createAdapter,
+    disposeAdapter: disposeAdapter,
+  );
+  runBatchKvAdapterTests<TAdapter>(
+    createAdapter: createAdapter,
+    disposeAdapter: disposeAdapter,
+  );
 }
 
 /// Runs the full common suite for local/reactive adapters.

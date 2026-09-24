@@ -14,7 +14,7 @@ Future<void> main() async {
     MemoryKvAdapter(codec: const MemoryKvCodec(prefix: 'demo.')),
     logger: Print.step,
   );
-  final kv = KvGateway(adapter);
+  final kv = KeyValue(adapter);
 
   Print.section('1. Typed keys and default values');
   await Print.value('Theme default', kv.app(.theme).read());

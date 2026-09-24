@@ -64,7 +64,7 @@ final class HiveCeKvAdapter
       if (event.deleted) {
         return RemoveKvChange<Object?>(
           key: key,
-          previousValue: null,
+          previousValue: event.value == null ? null : codec.decode(event.value),
         );
       }
 
@@ -79,12 +79,16 @@ final class HiveCeKvAdapter
   @override
   Stream<KvChange<Object?>> watchAll([String? prefix]) {
     return box.watch().where((event) {
+      if (!codec.ownsKey(event.key)) return false;
       final logicalKey = codec.logicalKey(event.key);
       return prefix == null || prefix.isEmpty || logicalKey.startsWith(prefix);
     }).map((event) {
       final logicalKey = codec.logicalKey(event.key);
       if (event.deleted) {
-        return RemoveKvChange<Object?>(key: logicalKey, previousValue: null);
+        return RemoveKvChange<Object?>(
+          key: logicalKey,
+          previousValue: event.value == null ? null : codec.decode(event.value),
+        );
       }
       return UpdateKvChange<Object?>(
         key: logicalKey,

@@ -9,7 +9,7 @@ import '../models/user_profile.dart';
 class HomePage extends StatelessWidget {
   const HomePage({required this.kv, super.key});
 
-  final KvGateway<CachedKvAdapter> kv;
+  final KeyValue<CachedKvAdapter> kv;
 
   Future<void> _login() async {
     await kv.batch((scope) async {

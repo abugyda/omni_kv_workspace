@@ -1,8 +1,8 @@
-import 'composite_kv_adapters.dart';
 import '../core/kv_capability.dart';
 import '../core/kv_codec.dart';
 import '../models/kv_change.dart';
 import '../models/kv_operation.dart';
+import 'composite_kv_adapters.dart';
 
 /// A decorator that wraps a full adapter and logs its operations.
 final class LoggingKvAdapter implements FullKvAdapter<LoggingKvCapability> {

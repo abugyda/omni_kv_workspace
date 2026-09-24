@@ -24,7 +24,7 @@ Future<void> main() async {
       onDecrypt: (payload) => utf8.decode(base64Decode(payload)).replaceAll('AES:', ''),
     ),
   );
-  final kv = KvGateway(LoggingKvAdapter(hive, logger: Print.step));
+  final kv = KeyValue(LoggingKvAdapter(hive, logger: Print.step));
 
   Print.section('1. Encrypted typed writes');
   await kv.auth(.token).write('super_secret_token');

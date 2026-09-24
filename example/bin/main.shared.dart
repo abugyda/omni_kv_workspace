@@ -12,7 +12,7 @@ Future<void> main() async {
 
   Print.title('OmniKV SharedPreferences + Cached Adapter Showcase');
 
-  final prefs = await SharedPreferences.getInstance();
+  final prefs = SharedPreferencesAsync();
   final cached = CachedKvAdapter(
     primary: MemoryKvAdapter(codec: const MemoryKvCodec(prefix: 'ui_cache.')),
     persistent: SharedPreferencesKvAdapter(
@@ -22,7 +22,7 @@ Future<void> main() async {
     writePolicy: CachedKvWritePolicy.writeBehind,
     onWriteBehindError: (error, stackTrace) => Print.step('Write-behind error: $error'),
   );
-  final kv = KvGateway(LoggingKvAdapter(cached, logger: Print.step));
+  final kv = KeyValue(LoggingKvAdapter(cached, logger: Print.step));
 
   Print.section('1. Cached writes stream immediately');
   final sub = kv.app(.theme).watch().listen((change) {
