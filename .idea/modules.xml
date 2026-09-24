@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+<module fileurl="file://$PROJECT_DIR$/packages/omni_kv/melos_omni_kv.iml" filepath="$PROJECT_DIR$/packages/omni_kv/melos_omni_kv.iml"/>
+<module fileurl="file://$PROJECT_DIR$/example/melos_omni_kv_example.iml" filepath="$PROJECT_DIR$/example/melos_omni_kv_example.iml"/>
+<module fileurl="file://$PROJECT_DIR$/packages/omni_kv_hive_ce/melos_omni_kv_hive_ce.iml" filepath="$PROJECT_DIR$/packages/omni_kv_hive_ce/melos_omni_kv_hive_ce.iml"/>
+<module fileurl="file://$PROJECT_DIR$/packages/omni_kv_secure_storage/melos_omni_kv_secure_storage.iml" filepath="$PROJECT_DIR$/packages/omni_kv_secure_storage/melos_omni_kv_secure_storage.iml"/>
+<module fileurl="file://$PROJECT_DIR$/packages/omni_kv_shared_preferences/melos_omni_kv_shared_preferences.iml" filepath="$PROJECT_DIR$/packages/omni_kv_shared_preferences/melos_omni_kv_shared_preferences.iml"/>
+<module fileurl="file://$PROJECT_DIR$/packages/omni_kv_testing/melos_omni_kv_testing.iml" filepath="$PROJECT_DIR$/packages/omni_kv_testing/melos_omni_kv_testing.iml"/>
+<module fileurl="file://$PROJECT_DIR$/melos_omni_kv_workspace.iml" filepath="$PROJECT_DIR$/melos_omni_kv_workspace.iml"/>
+<module fileurl="file://$PROJECT_DIR$/.idea/omni_kv_workspace.iml" filepath="$PROJECT_DIR$/.idea/omni_kv_workspace.iml"/>
+    </modules>
+  </component>
+</project>
