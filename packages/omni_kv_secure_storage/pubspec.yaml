@@ -5,6 +5,7 @@ version: 0.2.0
 homepage: https://github.com/puntbyte/omni_kv_workspace
 repository: https://github.com/puntbyte/omni_kv_workspace/tree/main/packages/omni_kv_secure_storage
 issue_tracker: https://github.com/puntbyte/omni_kv_workspace/issues
+documentation: https://docs.abugyda.com/omni-kv/adapters/secure-storage
 
 topics:
   - secure-storage

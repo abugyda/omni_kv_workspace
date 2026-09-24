@@ -43,8 +43,28 @@ melos:
       description: Run tests for pure Dart packages.
 
     test:flutter:
-      run: melos exec --dir-exists=test --flutter -- flutter test
-      description: Run tests for Flutter packages.
+      run: melos exec -c 1 --dir-exists=test --flutter -- flutter test
+      description: Run Flutter package tests serially.
+
+    docs:check:
+      run: dart run tool/check_docs.dart
+      description: Validate docs.abugyda.com OmniKV documentation coverage.
+
+    capabilities:check:
+      run: dart run tool/check_capability_gating.dart
+      description: Verify unsupported operations remain compile-time unavailable.
+
+    workspace:check:
+      run: dart run tool/check_workspace.dart
+      description: Check the workspace for generated/local artifacts.
+
+    example:analyze:
+      run: dart analyze example
+      description: Analyze the example application explicitly.
+
+    verify:
+      run: melos run format:check && melos run analyze && melos run test && melos run docs:check && melos run capabilities:check && melos run workspace:check
+      description: Run the main pre-release verification gates.
 
     publish:dry-run:
       run: melos exec --no-private -- dart pub publish --dry-run

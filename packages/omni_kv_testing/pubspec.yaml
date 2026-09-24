@@ -2,13 +2,18 @@ name: omni_kv_testing
 description: Adapter conformance tests and fixtures for OmniKV packages.
 version: 0.2.0
 
+homepage: https://github.com/puntbyte/omni_kv_workspace
+repository: https://github.com/puntbyte/omni_kv_workspace/tree/main/packages/omni_kv_testing
+issue_tracker: https://github.com/puntbyte/omni_kv_workspace/issues
+documentation: https://docs.abugyda.com/omni-kv/testing
+
 environment:
   sdk: ^3.11.0
 
 resolution: workspace
 
 dependencies:
-  omni_kv: any
+  omni_kv: ^0.2.0
   test: ^1.30.0
 
 dev_dependencies:

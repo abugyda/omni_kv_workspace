@@ -5,6 +5,7 @@ version: 0.2.0
 homepage: https://github.com/puntbyte/omni_kv_workspace
 repository: https://github.com/puntbyte/omni_kv_workspace/tree/main/packages/omni_kv_shared_preferences
 issue_tracker: https://github.com/puntbyte/omni_kv_workspace/issues
+documentation: https://docs.abugyda.com/omni-kv/adapters/shared-preferences
 
 topics:
   - shared-preferences
@@ -28,5 +29,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   omni_kv_testing: ^0.2.0
+  shared_preferences_platform_interface: ^2.4.2
   test: ^1.30.0
   very_good_analysis: ^10.3.0
