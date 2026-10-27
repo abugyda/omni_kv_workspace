@@ -15,20 +15,20 @@ topics:
   - keychain
 
 environment:
-  sdk: ^3.11.0
-  flutter: '>=3.35.0'
+  sdk: ^3.13.0
+  flutter: '>=3.47.0'
 
 resolution: workspace
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_secure_storage: ^11.2.0
+  flutter_secure_storage: any
   omni_kv: ^0.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   omni_kv_testing: ^0.2.0
-  test: ^1.30.0
-  very_good_analysis: ^10.3.0
+  test: any
+  very_good_analysis: any
